@@ -12,29 +12,72 @@ test('abre la pagina de Playwright', async ({ page }) => {
   
 });*/
 
-test('prueba', async ({ page }) => {
-  // práctica #1
-  
-  await page.goto('https://demo.playwright.dev/todomvc/#/');
-  await page.waitForTimeout(2000);
-
-  const inputField = page.getByPlaceholder('What needs to be done?');
+test.describe('Pruebas de la aplicación ToDoMVC', () => {
   const items = ['Comprar leche', 'Comprar pan'];
 
-  //primera tarea
-  await inputField.fill(items[0]);
-  await inputField.press('Enter');
-  await page.waitForTimeout(2000);
+  test.beforeEach(async ({ page }) => {
+    await page.goto('https://demo.playwright.dev/todomvc/#/');
+    await page.waitForTimeout(2000);
+  });
 
-  //comprobar que hay 1 tarea en la lista
-  await expect(page.locator('ul.todo-list li')).toHaveCount(1);
 
-  //segunda tarea
-  await inputField.fill(items[1]);
-  await inputField.press('Enter');
-  await page.waitForTimeout(2000);
+  
+  test('prueba', async ({ page }) => {
+    // práctica #1
+    const inputField = page.getByPlaceholder('What needs to be done?');
+    //primera tarea
+    await inputField.fill(items[0]);
+    await inputField.press('Enter');
+    await page.waitForTimeout(2000);
 
-  //comprobar que hay 2 tareas en la lista
-  await expect(page.locator('ul.todo-list li')).toHaveCount(2);
+    //comprobar que hay 1 tarea en la lista
+    await expect(page.locator('ul.todo-list li')).toHaveCount(1);
+
+    //segunda tarea
+    await inputField.fill(items[1]);
+    await inputField.press('Enter');
+    await page.waitForTimeout(2000);
+
+    //comprobar que hay 2 tareas en la lista
+    await expect(page.locator('ul.todo-list li')).toHaveCount(2);
+
+    });
+
+  test('prueba2', async ({ page }) => {
+    // práctica #2
+
+    const inputField = page.getByPlaceholder('What needs to be done?');
+
+    await inputField.fill(items[0]);
+    await inputField.press('Enter');
+
+    //comprobar que el campo de entrada está vacío
+    await expect(inputField).toHaveValue('');
 
   });
+
+  test('prueba4', async ({ page }) => {
+
+    // práctica #4
+    const inputField = page.getByPlaceholder('What needs to be done?');
+    const items = ['manzanas', 'cerezas', 'peras'];
+
+    // Agregar varias tareas a la lista
+    for (const item of items) {
+      await inputField.fill(item);
+      await inputField.press('Enter');
+    }
+
+    //contar los elementos de la lista
+    await expect(page.locator('ul.todo-list li')).toHaveCount(items.length);
+
+    //comprobar que el contador de tareas pendientes muestra el número correcto
+    await expect(page.locator('.todo-count')).toContainText("3 items left");
+
+    //verificar que el contador de tareas pendientes muestra el número correcto usando un selector más específico
+    await expect(page.locator('.todo-count strong')).toHaveText('3');
+
+  });
+
+
+});
