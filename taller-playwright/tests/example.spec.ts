@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /*
 test('abre la pagina de Playwright', async ({ page }) => {
@@ -12,13 +12,26 @@ test('abre la pagina de Playwright', async ({ page }) => {
   
 });*/
 
+//práctica 8
+async function crearTareas(page: Page){
+  const inputField = page.getByPlaceholder('What needs to be done?');
+    const items = ['manzanas', 'cerezas', 'peras'];
+
+    // Agregar varias tareas a la lista
+    for (const item of items) {
+      await inputField.fill(item);
+      await inputField.press('Enter');
+    }
+}
+
 test.describe('Pruebas de la aplicación ToDoMVC', () => {
   const items = ['Comprar leche', 'Comprar pan'];
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://demo.playwright.dev/todomvc/#/');
-    await page.waitForTimeout(2000);
+    await page.goto('./');
   });
+
+
 
 
   
@@ -76,8 +89,60 @@ test.describe('Pruebas de la aplicación ToDoMVC', () => {
 
     //verificar que el contador de tareas pendientes muestra el número correcto usando un selector más específico
     await expect(page.locator('.todo-count strong')).toHaveText('3');
+    
+
+  });
+
+  test('prueba6', async ({ page }) => {
+
+    const inputField = page.getByPlaceholder('What needs to be done?');
+    const items = ['manzanas', 'cerezas', 'peras'];
+
+    // Agregar varias tareas a la lista
+    for (const item of items) {
+      await inputField.fill(item);
+      await inputField.press('Enter');
+    }
+
+    //marcar todas como completadas
+    await page.getByRole('checkbox', { name: 'Mark all as complete' }).check();
+
+    //comprobar que todas están completadas
+    await expect(page.locator('ul.todo-list li.completed')).toHaveCount(items.length);
+
 
   });
 
 
+});
+
+test.describe('Practica 8', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('./');
+    await crearTareas(page);
+  });
+
+  test('prueba8', async ({ page }) => {
+    //marcar todas como completadas
+    await page.getByRole('checkbox', { name: 'Mark all as complete' }).check();
+
+    //comprobar que todas están completadas
+    await expect(page.locator('ul.todo-list li.completed')).toHaveCount(3);
+
+  });
+
+  test('prueba9', async ({ page }) => {
+    const checkbox = page.getByRole('checkbox', {name: 'Mark all as complete'});
+
+    //marcar todas las tareas
+    await checkbox.check();
+    //desmarcarlas
+    await checkbox.uncheck();
+
+    //comprobar
+    await expect(page.locator('ul.todo-list li.completed')).toHaveCount(0);
+
+
+  });
 });
