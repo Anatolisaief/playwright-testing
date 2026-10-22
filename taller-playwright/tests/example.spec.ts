@@ -1,148 +1,98 @@
-import { test, expect, Page } from '@playwright/test';
-
-/*
-test('abre la pagina de Playwright', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
-  await page.waitForTimeout(2000);
-
-  //Buscar y hacer click en el enlace de "Get Started"
-  const enlaceGetStarted = page.locator('a.getStarted_Sjon');
-  await enlaceGetStarted.click();
-  await page.waitForTimeout(2000);
-  
-});*/
-
-//práctica 8
-async function crearTareas(page: Page){
-  const inputField = page.getByPlaceholder('What needs to be done?');
-    const items = ['manzanas', 'cerezas', 'peras'];
-
-    // Agregar varias tareas a la lista
-    for (const item of items) {
-      await inputField.fill(item);
-      await inputField.press('Enter');
-    }
-}
+import { test, expect } from '@playwright/test';
+import { TodoPage } from '../pages/TodoPage';
 
 test.describe('Pruebas de la aplicación ToDoMVC', () => {
   const items = ['Comprar leche', 'Comprar pan'];
+  let todoPage: TodoPage;
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('./');
+    todoPage = new TodoPage(page);
+    await todoPage.goto();
   });
 
-
-
-
-  
-  test('prueba', async ({ page }) => {
+  test('prueba', async () => {
     // práctica #1
-    const inputField = page.getByPlaceholder('What needs to be done?');
     //primera tarea
-    await inputField.fill(items[0]);
-    await inputField.press('Enter');
-    await page.waitForTimeout(2000);
+    await todoPage.addTodo(items[0]);
+    await todoPage.page.waitForTimeout(2000);
 
     //comprobar que hay 1 tarea en la lista
-    await expect(page.locator('ul.todo-list li')).toHaveCount(1);
+    await expect(todoPage.todoItems).toHaveCount(1);
 
     //segunda tarea
-    await inputField.fill(items[1]);
-    await inputField.press('Enter');
-    await page.waitForTimeout(2000);
+    await todoPage.addTodo(items[1]);
+    await todoPage.page.waitForTimeout(2000);
 
     //comprobar que hay 2 tareas en la lista
-    await expect(page.locator('ul.todo-list li')).toHaveCount(2);
+    await expect(todoPage.todoItems).toHaveCount(2);
+  });
 
-    });
-
-  test('prueba2', async ({ page }) => {
+  test('prueba2', async () => {
     // práctica #2
-
-    const inputField = page.getByPlaceholder('What needs to be done?');
-
-    await inputField.fill(items[0]);
-    await inputField.press('Enter');
+    await todoPage.addTodo(items[0]);
 
     //comprobar que el campo de entrada está vacío
-    await expect(inputField).toHaveValue('');
-
+    await expect(todoPage.inputField).toHaveValue('');
   });
 
-  test('prueba4', async ({ page }) => {
-
+  test('prueba4', async () => {
     // práctica #4
-    const inputField = page.getByPlaceholder('What needs to be done?');
     const items = ['manzanas', 'cerezas', 'peras'];
 
     // Agregar varias tareas a la lista
-    for (const item of items) {
-      await inputField.fill(item);
-      await inputField.press('Enter');
-    }
+    await todoPage.addTodos(items);
 
     //contar los elementos de la lista
-    await expect(page.locator('ul.todo-list li')).toHaveCount(items.length);
+    await expect(todoPage.todoItems).toHaveCount(items.length);
 
     //comprobar que el contador de tareas pendientes muestra el número correcto
-    await expect(page.locator('.todo-count')).toContainText("3 items left");
+    await expect(todoPage.todoCount).toContainText('3 items left');
 
     //verificar que el contador de tareas pendientes muestra el número correcto usando un selector más específico
-    await expect(page.locator('.todo-count strong')).toHaveText('3');
-    
-
+    await expect(todoPage.todoCountStrong).toHaveText('3');
   });
 
-  test('prueba6', async ({ page }) => {
-
-    const inputField = page.getByPlaceholder('What needs to be done?');
+  test('prueba6', async () => {
     const items = ['manzanas', 'cerezas', 'peras'];
 
     // Agregar varias tareas a la lista
-    for (const item of items) {
-      await inputField.fill(item);
-      await inputField.press('Enter');
-    }
+    await todoPage.addTodos(items);
 
     //marcar todas como completadas
-    await page.getByRole('checkbox', { name: 'Mark all as complete' }).check();
+    await todoPage.markAllAsComplete();
 
     //comprobar que todas están completadas
-    await expect(page.locator('ul.todo-list li.completed')).toHaveCount(items.length);
-
-
+    await expect(todoPage.completedItems).toHaveCount(items.length);
   });
-
-
 });
 
 test.describe('Practica 8', () => {
+  let todoPage: TodoPage;
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('./');
-    await crearTareas(page);
+    todoPage = new TodoPage(page);
+    await todoPage.goto();
+    await todoPage.addTodos(['manzanas', 'cerezas', 'peras']);
   });
 
-  test('prueba8', async ({ page }) => {
+  test('prueba8', async () => {
     //marcar todas como completadas
-    await page.getByRole('checkbox', { name: 'Mark all as complete' }).check();
+    await todoPage.markAllAsComplete();
 
     //comprobar que todas están completadas
-    await expect(page.locator('ul.todo-list li.completed')).toHaveCount(3);
-
+    await expect(todoPage.completedItems).toHaveCount(3);
   });
 
-  test('prueba9', async ({ page }) => {
-    const checkbox = page.getByRole('checkbox', {name: 'Mark all as complete'});
-
+  test('prueba9', async () => {
     //marcar todas las tareas
-    await checkbox.check();
+    await todoPage.markAllAsComplete();
     //desmarcarlas
-    await checkbox.uncheck();
+    await todoPage.unmarkAllAsComplete();
 
     //comprobar
-    await expect(page.locator('ul.todo-list li.completed')).toHaveCount(0);
-
-
+    await expect(todoPage.completedItems).toHaveCount(0);
   });
+
+  
+  
 });
